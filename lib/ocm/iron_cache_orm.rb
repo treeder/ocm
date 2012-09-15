@@ -3,9 +3,9 @@ require 'iron_cache'
 module Ocm
   class Orm
 
-    def initialize(options={})
-      @iron_cache = IronCache::Client.new(options)
-      @cache = @iron_cache.cache(options[:cache_name] || "ocm")
+    # initialize with a cache object from IronCache::Client, eg: iron_cache.cache("my_object_cache")
+    def initialize(cache)
+      @cache = cache
     end
 
     def key_for(idable, id=nil)

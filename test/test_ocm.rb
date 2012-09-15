@@ -12,7 +12,8 @@ class TestOcm < TestBase
   end
 
   def test_basics
-    orm = Ocm::Orm.new
+    ic = IronCache::Client.new()
+    orm = Ocm::Orm.new(ic.cache("ocm_gem_tests"))
 
     contact = Contact.new(:name=>"t2")
     puts contact.name

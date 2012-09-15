@@ -3,6 +3,7 @@ require 'ostruct'
 require_relative 'idable'
 
 module Ocm
+  # todo: Name this something better, lame name
   module Ormable
 
     def self.included(by)
