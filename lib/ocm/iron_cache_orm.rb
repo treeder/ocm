@@ -21,8 +21,10 @@ module Ocm
       unless idable.id
         idable.id = Idable.generate_id
       end
+      if defined? idable.set_timestamps
+        idable.set_timestamps
+      end
       put(key_for(idable), idable)
-
     end
 
     def save_list(key, array)
@@ -38,12 +40,41 @@ module Ocm
       messages
     end
 
+    # first item that matches comps is replaced with item.
+    def update_in_list(key, item, comps)
+      messages = get_list(key)
+      messages.each_with_index do |m,i|
+        match = true
+        comps.each_pair do |k,v|
+          if m.is_a?(Hash)
+            if m[k] != v
+              match = false
+              break
+            end
+          else
+            if m.__send__(k.to_sym) != v
+              match = false
+              break
+            end
+          end
+        end
+        if match
+          messages[i] = item
+          put(key, messages)
+          return
+        end
+      end
+      raise "No matching item found in list"
+    end
+
+    # Warning, this is not a safe operation, be sure it is only being called once at a time
     def prepend_to_list(key, item)
       messages = get_list(key)
       messages.unshift(item)
       put(key, messages)
     end
 
+    # Warning, this is not a safe operation, be sure it is only being called once at a time
     def append_to_list(key, item)
       messages = get_list(key)
       messages.push(item)
@@ -85,6 +116,10 @@ module Ocm
       @cache.put(key, value, options)
     end
 
+    def remove(idable, id=nil)
+      delete(key_for(idable, id))
+    end
+
     def delete(key)
       @cache.delete(key)
     end
@@ -92,7 +127,7 @@ module Ocm
     def increment(key, value=1)
       puts 'INC'
       begin
-        ret = @cache.increment(key)
+        ret = @cache.increment(key, value)
         puts 'INC RET ' + ret.inspect
         return ret.value
       rescue Rest::HttpError, IronCore::ResponseError => ex
