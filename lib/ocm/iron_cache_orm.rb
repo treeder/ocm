@@ -1,6 +1,19 @@
 require 'iron_cache'
+require 'logger'
 
 module Ocm
+
+  @@logger = Logger.new(STDOUT)
+  @@logger.level = Logger::INFO
+
+  def self.logger
+    @@logger
+  end
+
+  def self.logger=(l)
+    @@logger = l
+  end
+
   class Orm
 
     # initialize with a cache object from IronCache::Client, eg: iron_cache.cache("my_object_cache")
@@ -43,11 +56,12 @@ module Ocm
     # first item that matches comps is replaced with item.
     def update_in_list(key, item, comps)
       messages = get_list(key)
+      Ocm.logger.debug "update_in_list: messages: #{messages.inspect}"
       messages.each_with_index do |m,i|
         match = true
         comps.each_pair do |k,v|
           if m.is_a?(Hash)
-            if m[k] != v
+            if m[k.to_s] != v
               match = false
               break
             end
@@ -64,7 +78,7 @@ module Ocm
           return
         end
       end
-      raise "No matching item found in list"
+      raise "No matching item found in list for #{comps.inspect}"
     end
 
     # Warning, this is not a safe operation, be sure it is only being called once at a time
