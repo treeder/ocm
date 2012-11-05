@@ -156,7 +156,18 @@ module Ocm
         puts "done increment"
         return 1
       end
-      puts 'end inc'
+    end
+
+    # You can add these to allow multiple ways to look up an object, rather than just a single key
+    def add_alias(key_from, ob_to)
+      put(key_for(ob_to.class, key_from), key_for(ob_to))
+    end
+
+    # returns the object found by the key contained in the alias entry
+    def get_alias(clz, key_from)
+      real_key = get(key_for(clz, key_from))
+      return nil unless real_key
+      get(real_key)
     end
   end
 end
