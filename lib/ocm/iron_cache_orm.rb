@@ -57,9 +57,9 @@ module Ocm
     def update_in_list(key, item, comps)
       messages = get_list(key)
       Ocm.logger.debug "update_in_list: messages: #{messages.inspect}"
-      messages.each_with_index do |m,i|
+      messages.each_with_index do |m, i|
         match = true
-        comps.each_pair do |k,v|
+        comps.each_pair do |k, v|
           if m.is_a?(Hash)
             if m[k.to_s] != v
               match = false
@@ -73,7 +73,11 @@ module Ocm
           end
         end
         if match
-          messages[i] = item
+          if item
+            messages[i] = item
+          else
+            messages.delete_at(i)
+          end
           put(key, messages)
           return
         end
@@ -93,6 +97,12 @@ module Ocm
       messages = get_list(key)
       messages.push(item)
       put(key, messages)
+    end
+
+    # Warning, this is not a safe operation, be sure it is only being called once at a time
+    def remove_from_list(key, comps)
+      #id = item.is_a?(String) ? item : item.id
+      update_in_list(key, nil, comps)
     end
 
     def find(clazz, id)
