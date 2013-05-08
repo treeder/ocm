@@ -119,7 +119,7 @@ module Ocm
       val = val.value
       #puts "got from cache #{val}"
       begin
-        val = JSON.parse(val)
+        val = JSON.load(val)
         if val.is_a?(Hash) && val['string']
           val = val['string']
         end
